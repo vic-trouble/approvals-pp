@@ -1,5 +1,11 @@
 #pragma once
 
+/// override it for use with your favorite unit test framework
+#ifndef APPROVALS_ASSERT
+#define APPROVALS_ASSERT assert
+#endif
+
+#include <cassert>
 #include <list>
 #include <map>
 #include <fstream>
@@ -9,43 +15,41 @@
 #include <sstream>
 #include <vector>
 
-#include <gtest/gtest.h>
-
 namespace approvals
 {
 
-  template <class Object>
+  template <typename Object>
   void verify(const Object &object, const std::string &testcase);
 
-  template <class Function, class ArgumentRange>
+  template <typename Function, typename ArgumentRange>
   void verify(const Function &function, const ArgumentRange &range, const std::string &testcase);
 
-  template <class Function, class ArgumentRange1, class ArgumentRange2>
+  template <typename Function, typename ArgumentRange1, typename ArgumentRange2>
   void verify(const Function &function, const ArgumentRange1 &range1, const ArgumentRange2 &range2, const std::string &testcase);
 
-  template <class Function, class ArgumentRange1, class ArgumentRange2, class ArgumentRange3>
+  template <typename Function, typename ArgumentRange1, typename ArgumentRange2, typename ArgumentRange3>
   void verify(const Function &function, const ArgumentRange1 &range1, const ArgumentRange2 &range2, const ArgumentRange3 &range3, const std::string &testcase);
 
-  template <class Object>
+  template <typename Object>
   std::string to_string(const Object &object);
 
-  template <class Element>
+  template <typename Element>
   std::string to_string(const std::list<Element> &collection);
 
-  template <class Element>
+  template <typename Element>
   std::string to_string(const std::vector<Element> &collection);
 
-  template <class Element>
+  template <typename Element>
   std::string to_string(const std::set<Element> &collection);
 
-  template <class Key, class Value>
+  template <typename Key, typename Value>
   std::string to_string(const std::map<Key, Value> &collection);
 }
 
 namespace
 {
 
-  template <class Collection>
+  template <typename Collection>
   std::string collection_to_string(const Collection &collection)
   {
     std::ostringstream stream;
@@ -79,7 +83,7 @@ namespace
       show_diff = !test_pass;
     }
 
-    EXPECT_TRUE(test_pass);
+    APPROVALS_ASSERT(test_pass);
 
     if (show_diff)
     {
@@ -97,13 +101,13 @@ namespace
   }
 }
 
-template <class Object>
+template <typename Object>
 void approvals::verify(const Object &object, const std::string &testcase)
 {
   verify_string(to_string(object), testcase);
 }
 
-template <class Object>
+template <typename Object>
 std::string approvals::to_string(const Object &object)
 {
   std::ostringstream stream;
@@ -111,25 +115,25 @@ std::string approvals::to_string(const Object &object)
   return stream.str();
 }
 
-template <class Element>
+template <typename Element>
 std::string approvals::to_string(const std::list<Element> &collection)
 {
   return ::collection_to_string(collection);
 }
 
-template <class Element>
+template <typename Element>
 std::string approvals::to_string(const std::vector<Element> &collection)
 {
   return ::collection_to_string(collection);
 }
 
-template <class Element>
+template <typename Element>
 std::string approvals::to_string(const std::set<Element> &collection)
 {
   return ::collection_to_string(collection);
 }
 
-template <class Key, class Value>
+template <typename Key, typename Value>
 std::string approvals::to_string(const std::map<Key, Value> &collection)
 {
   std::ostringstream stream;
@@ -140,12 +144,12 @@ std::string approvals::to_string(const std::map<Key, Value> &collection)
   return stream.str();
 }
 
-template <class Function, class ArgumentRange>
+template <typename Function, typename ArgumentRange>
 void approvals::verify(const Function &function, const ArgumentRange &range, const std::string &testcase)
 {
   std::ostringstream received;
 
-  for (auto arg: range)
+  for (const auto &arg: range)
   {
     received << arg << " = ";
     try
@@ -162,14 +166,14 @@ void approvals::verify(const Function &function, const ArgumentRange &range, con
   verify_string(received.str(), testcase);
 }
 
-template <class Function, class ArgumentRange1, class ArgumentRange2>
+template <typename Function, typename ArgumentRange1, typename ArgumentRange2>
 void approvals::verify(const Function &function, const ArgumentRange1 &range1, const ArgumentRange2 &range2, const std::string &testcase)
 {
   std::ostringstream received;
 
-  for (auto arg1: range1)
+  for (const auto &arg1: range1)
   {
-    for (auto arg2: range2)
+    for (const auto &arg2: range2)
     {
       received << arg1 << ", " << arg2 << " = ";
       try
@@ -187,16 +191,16 @@ void approvals::verify(const Function &function, const ArgumentRange1 &range1, c
   verify_string(received.str(), testcase);
 }
 
-template <class Function, class ArgumentRange1, class ArgumentRange2, class ArgumentRange3>
+template <typename Function, typename ArgumentRange1, typename ArgumentRange2, typename ArgumentRange3>
 void approvals::verify(const Function &function, const ArgumentRange1 &range1, const ArgumentRange2 &range2, const ArgumentRange3 &range3, const std::string &testcase)
 {
   std::ostringstream received;
 
-  for (auto arg1: range1)
+  for (const auto &arg1: range1)
   {
-    for (auto arg2: range2)
+    for (const auto &arg2: range2)
     {
-      for (auto arg3: range3)
+      for (const auto &arg3: range3)
       {
         received << arg1 << ", " << arg2 << ", " << arg3 << " = ";
         try

@@ -17,6 +17,7 @@
 
 namespace approvals
 {
+  void set_diff(const std::string &diff_command);
 
   template <typename Object>
   void verify(const Object &object, const std::string &testcase);
@@ -46,8 +47,16 @@ namespace approvals
   std::string to_string(const std::map<Key, Value> &collection);
 }
 
-namespace
+namespace detail
 {
+  std::string diff_command;
+  const std::string &get_diff()
+  {
+  if (diff_command.empty())
+    throw std::logic_error("diff command is not set, call set_diff() first");
+  return diff_command;
+  }
+
 
   template <typename Collection>
   std::string collection_to_string(const Collection &collection)
@@ -87,24 +96,22 @@ namespace
 
     if (show_diff)
     {
-#pragma warning(suppress: 4996) // unsafe function
-      const char *raw_diff = getenv("LIB_APPROVALS_DIFF");
-      if (!raw_diff || !*raw_diff)
-        throw std::runtime_error("can't expand %LIB_APPROVALS_DIFF%");
-
-      std::string diff(raw_diff);
-      std::string command = "\"" + diff + "\"" + " " + received_filename + " " + approved_filename;
-
+      std::string command = "\"" + get_diff() + "\"" + " " + received_filename + " " + approved_filename;
       if (system(command.c_str()) != 0)
         throw std::runtime_error("can't execute diff: " + command);
     }
   }
 }
 
+void approvals::set_diff(const std::string &diff_command)
+  {
+  detail::diff_command = diff_command;
+  }
+
 template <typename Object>
 void approvals::verify(const Object &object, const std::string &testcase)
 {
-  verify_string(to_string(object), testcase);
+  detail::verify_string(to_string(object), testcase);
 }
 
 template <typename Object>
@@ -163,7 +170,7 @@ void approvals::verify(const Function &function, const ArgumentRange &range, con
     received << std::endl;
   }
 
-  verify_string(received.str(), testcase);
+  detail::verify_string(received.str(), testcase);
 }
 
 template <typename Function, typename ArgumentRange1, typename ArgumentRange2>
@@ -188,7 +195,7 @@ void approvals::verify(const Function &function, const ArgumentRange1 &range1, c
     }
   }
 
-  verify_string(received.str(), testcase);
+  detail::verify_string(received.str(), testcase);
 }
 
 template <typename Function, typename ArgumentRange1, typename ArgumentRange2, typename ArgumentRange3>
@@ -216,5 +223,5 @@ void approvals::verify(const Function &function, const ArgumentRange1 &range1, c
     }
   }
 
-  verify_string(received.str(), testcase);
+  detail::verify_string(received.str(), testcase);
 }

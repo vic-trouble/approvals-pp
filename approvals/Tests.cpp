@@ -1,3 +1,5 @@
+namespace testing { void Assert(bool); }
+#define APPROVALS_ASSERT testing::Assert
 #include "approvals.h"
 
 #include <cmath>
@@ -6,6 +8,28 @@
 #include <iostream>
 
 using namespace approvals;
+
+namespace testing // poor man's tests
+  {
+  namespace detail
+    {
+    bool succeeded = true;
+    }
+
+  bool Succeeded()
+    {
+    return detail::succeeded;
+    }
+
+  void Assert(bool outcome)
+    {
+    if (outcome)
+      return;
+
+    std::cerr << "failed\n";
+    detail::succeeded = false;
+    }
+  }
 
 void TestPrimitiveTypes()
 {
@@ -53,13 +77,13 @@ void TestCollection()
 
 void TestAssociativeCollection()
 {
-std::map<std::string, Point> map = { {"alpha", Point(1, 2)},{"bravo", Point(3, 4)} };
+  std::map<std::string, Point> map = { {"alpha", Point(1, 2)},{"bravo", Point(3, 4)} };
   verify(map, "test.map");
 }
 
 void TestFunctions()
 {
-std::list<double> range = { 0, 4, 9, 10 };
+  std::list<double> range = { 0, 4, 9, 10 };
   auto sqrt_double = [](double x) -> double { return sqrt(x); };
   verify(sqrt_double, range, "test.function.1-arg");
   
@@ -68,14 +92,15 @@ std::list<double> range = { 0, 4, 9, 10 };
   double(*phypot)(double, double) = std::hypot;
   verify(phypot, range_x, range_y, std::string("test.function.2-arg"));
     
-  std::list<std::string> range1 = { "hello","see", "Walter" };
-  std::list<std::string> range2 = { "cruel","you", "Edmund" };
-  std::list<std::string> range3 = { "world","later", "White" };
+  std::list<std::string> range1 = { "hello", "see", "Walter" };
+  std::list<std::string> range2 = { "cruel", "you", " Edmund " };
+  std::list<std::string> range3 = { "world", "later", "White" };
   auto concat = [](const std::string &left, const std::string &mid, const std::string &right) -> std::string
   {
     return left + mid + right;
   };
-  verify(concat, range1, range2, range3, "test.function-3.arg");}
+  verify(concat, range1, range2, range3, "test.function-3.arg");
+}
 
 void TestExceptions()
 {
@@ -84,7 +109,7 @@ void TestExceptions()
     if (x < 0)
       {
       std::stringstream ss;
-      ss << "negative value (" << x << ")";
+      ss << "negative value (" << std::fixed << x << ")";
       throw std::domain_error(ss.str());
       }
 
@@ -94,9 +119,19 @@ void TestExceptions()
   verify(safe_sqrt, range, "test.exceptions");
 }
 
-void main(int argc, char **argv)
+int main(int argc, char **argv)
 {
-TestPrimitiveTypes();
-TestUserObject();
-std::cout << "all ok" << std::endl;
+  set_diff("winmergeU");
+
+  TestPrimitiveTypes();
+  TestUserObject();
+  TestCollection();
+  TestAssociativeCollection();
+  TestFunctions();
+  TestExceptions();
+  if (!testing::Succeeded())
+    return 1;
+
+  std::cout << "all ok\n";
+  return 0;
 }

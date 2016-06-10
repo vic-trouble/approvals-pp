@@ -125,19 +125,19 @@ std::string approvals::to_string(const Object &object)
 template <typename Element>
 std::string approvals::to_string(const std::list<Element> &collection)
 {
-  return ::collection_to_string(collection);
+  return detail::collection_to_string(collection);
 }
 
 template <typename Element>
 std::string approvals::to_string(const std::vector<Element> &collection)
 {
-  return ::collection_to_string(collection);
+  return detail::collection_to_string(collection);
 }
 
 template <typename Element>
 std::string approvals::to_string(const std::set<Element> &collection)
 {
-  return ::collection_to_string(collection);
+  return detail::collection_to_string(collection);
 }
 
 template <typename Key, typename Value>
